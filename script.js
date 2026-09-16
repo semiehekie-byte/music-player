@@ -2,6 +2,20 @@ const api = '/api/songs';
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 
+function showOpenNotification() {
+	if (!('Notification' in window) || Notification.permission !== 'granted' || sessionStorage.getItem('pulseboard-open-notified')) return;
+	new Notification('Pulseboard', { body: 'De gezamenlijke muziekwachtrij staat klaar.' });
+	sessionStorage.setItem('pulseboard-open-notified', '1');
+}
+
+async function enableNotifications() {
+	const button = document.querySelector('#notification-button');
+	if (!('Notification' in window)) { button.textContent = 'Niet ondersteund'; button.disabled = true; return; }
+	const permission = await Notification.requestPermission();
+	if (permission === 'granted') { button.textContent = 'Meldingen aan'; showOpenNotification(); }
+	else if (permission === 'denied') button.textContent = 'Meldingen geblokkeerd';
+}
+
 async function getSongs() {
 	const response = await fetch(api);
 	if (!response.ok) throw new Error('Kon de nummers niet laden.');
@@ -38,6 +52,8 @@ async function deleteSong(id) { await fetch(`${api}/${encodeURIComponent(id)}`, 
 document.querySelector('#add-form')?.addEventListener('submit', addSong);
 document.querySelector('#song-list')?.addEventListener('click', event => { const button = event.target.closest('[data-delete]'); if (button) deleteSong(button.dataset.delete); });
 loadSongs();
+document.querySelector('#notification-button')?.addEventListener('click', enableNotifications);
+showOpenNotification();
 
 const sharedStatus = new URLSearchParams(window.location.search).get('shared');
 if (sharedStatus) {
