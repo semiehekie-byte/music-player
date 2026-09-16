@@ -2,6 +2,23 @@ const api = '/api/songs';
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 
+let installPrompt;
+
+window.addEventListener('beforeinstallprompt', event => {
+	event.preventDefault();
+	installPrompt = event;
+});
+
+async function installApp() {
+	if (installPrompt) {
+		installPrompt.prompt();
+		await installPrompt.userChoice;
+		installPrompt = null;
+		return;
+	}
+	alert('Op iPhone: tik op Delen en kies \'Zet op beginscherm\'. Op Android: open het browsermenu en kies App installeren.');
+}
+
 function showOpenNotification() {
 	if (!('Notification' in window) || Notification.permission !== 'granted' || sessionStorage.getItem('pulseboard-open-notified')) return;
 	new Notification('Pulseboard', { body: 'De gezamenlijke muziekwachtrij staat klaar.' });
@@ -52,7 +69,7 @@ async function deleteSong(id) { await fetch(`${api}/${encodeURIComponent(id)}`, 
 document.querySelector('#add-form')?.addEventListener('submit', addSong);
 document.querySelector('#song-list')?.addEventListener('click', event => { const button = event.target.closest('[data-delete]'); if (button) deleteSong(button.dataset.delete); });
 loadSongs();
-document.querySelector('#notification-button')?.addEventListener('click', enableNotifications);
+document.querySelector('#install-button')?.addEventListener('click', installApp);
 showOpenNotification();
 
 const sharedStatus = new URLSearchParams(window.location.search).get('shared');
