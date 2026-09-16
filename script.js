@@ -65,8 +65,23 @@ async function addSong(event) {
 	} catch (error) { message.textContent = error.message; message.className = 'form-message error'; } finally { submit.disabled = false; }
 }
 
+async function pasteYouTubeLink() {
+	const message = document.querySelector('#form-message');
+	try {
+		if (!navigator.clipboard) throw new Error('Kopiëren/plakken wordt niet ondersteund in deze browser.');
+		const urlInput = document.querySelector('#url');
+		urlInput.value = await navigator.clipboard.readText();
+		if (!urlInput.value.trim()) throw new Error('Er staat geen link op je klembord.');
+		document.querySelector('#add-form').requestSubmit();
+	} catch (error) {
+		message.textContent = `${error.message} Kopieer eerst de link in YouTube.`;
+		message.className = 'form-message error';
+	}
+}
+
 async function deleteSong(id) { await fetch(`${api}/${encodeURIComponent(id)}`, { method: 'DELETE' }); loadSongs(); }
 document.querySelector('#add-form')?.addEventListener('submit', addSong);
+document.querySelector('#clipboard-button')?.addEventListener('click', pasteYouTubeLink);
 document.querySelector('#song-list')?.addEventListener('click', event => { const button = event.target.closest('[data-delete]'); if (button) deleteSong(button.dataset.delete); });
 loadSongs();
 document.querySelector('#install-button')?.addEventListener('click', installApp);
