@@ -1,0 +1,19 @@
+{
+  "name": "Pulseboard Muziekspeler",
+  "short_name": "Pulseboard",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f1e9",
+  "theme_color": "#17201d",
+  "icons": [],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}

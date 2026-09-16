@@ -1,5 +1,7 @@
 const api = '/api/songs';
 
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+
 async function getSongs() {
 	const response = await fetch(api);
 	if (!response.ok) throw new Error('Kon de nummers niet laden.');
@@ -36,3 +38,11 @@ async function deleteSong(id) { await fetch(`${api}/${encodeURIComponent(id)}`, 
 document.querySelector('#add-form')?.addEventListener('submit', addSong);
 document.querySelector('#song-list')?.addEventListener('click', event => { const button = event.target.closest('[data-delete]'); if (button) deleteSong(button.dataset.delete); });
 loadSongs();
+
+const sharedStatus = new URLSearchParams(window.location.search).get('shared');
+if (sharedStatus) {
+	const message = document.querySelector('#form-message');
+	message.textContent = sharedStatus === '1' ? 'Via het delen-menu toegevoegd aan de wachtrij.' : 'De gedeelde link was geen geldige YouTube-link.';
+	message.className = sharedStatus === '1' ? 'form-message' : 'form-message error';
+	history.replaceState({}, '', '/');
+}
